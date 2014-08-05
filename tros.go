@@ -6,18 +6,6 @@ import (
 	"sort"
 )
 
-/*
-func main() {
-	in := []struct {
-		A, B string
-	}{{"a", "c"}, {"b", "b"}, {"c", "a"}}
-	Sort(in, "A")
-	fmt.Println(in)
-
-	Sort(in, "B")
-	fmt.Println(in)
-}*/
-
 // Sort sorts a slice of structs based on the values of the structs' fields with the given field name fn
 func Sort(i interface{}, fn string) error {
 	sval := reflect.ValueOf(i)
