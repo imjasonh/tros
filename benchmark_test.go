@@ -1,5 +1,19 @@
 package tros
 
+/*
+* Sample run:
+*
+* PASS
+* BenchmarkTros10           500000              4298 ns/op
+* BenchmarkTros100           50000             65702 ns/op
+* BenchmarkTros1000           5000            750208 ns/op
+* BenchmarkTros10000           500           7033497 ns/op
+* BenchmarkSort10          5000000               481 ns/op
+* BenchmarkSort100          200000             12586 ns/op
+* BenchmarkSort1000          10000            139314 ns/op
+* BenchmarkSort10000          2000           1164613 ns/op
+ */
+
 import (
 	"math/rand"
 	"sort"
