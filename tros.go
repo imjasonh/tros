@@ -11,6 +11,9 @@ import (
 //
 // i must be a slice of homogeneous structs. That is, all structs must have an
 // exported field with the name fn, and those fields must all be of the same type.
+//
+// Sort is significantly (~10x) slower than the standard Go sort package,
+// because it relies heavily on reflection.
 func Sort(i interface{}, fn string) error {
 	sval := reflect.ValueOf(i)
 	if sval.Kind() != reflect.Slice {
@@ -20,6 +23,12 @@ func Sort(i interface{}, fn string) error {
 	vals := make([]reflect.Value, l)
 	fs := make([]reflect.Value, l)
 	k := sval.Index(0).FieldByName(fn).Kind()
+	if k == reflect.Invalid {
+		return fmt.Errorf("no field with name %q", fn)
+	}
+	if k > reflect.Float64 && k != reflect.String {
+		return fmt.Errorf("unsupported kind %q", k)
+	}
 	for i := 0; i < l; i++ {
 		v := sval.Index(i)
 		f := v.FieldByName(fn)
@@ -29,24 +38,19 @@ func Sort(i interface{}, fn string) error {
 		vals[i] = v
 		fs[i] = f
 	}
-	s := sortable{vals, fs, k, nil}
-	sort.Sort(sort.Interface(s))
-	return s.err
+	sort.Sort(sort.Interface(sortable{vals, fs, k}))
+	return nil
 }
 
 type sortable struct {
 	vals []reflect.Value
 	fs   []reflect.Value
 	k    reflect.Kind
-	err  error
 }
 
 func (s sortable) Len() int { return len(s.vals) }
 
 func (s sortable) Swap(i, j int) {
-	if s.err != nil {
-		return
-	}
 	a, b := s.vals[i], s.vals[j]
 	tmp := reflect.New(a.Type()).Elem()
 	tmp.Set(a)
@@ -68,7 +72,7 @@ func (s sortable) Less(i, j int) bool {
 	case reflect.String:
 		return af.String() < bf.String()
 	default:
-		s.err = fmt.Errorf("unsupported kind %q", s.k)
-		return false
+		// Check in Sort should prevent this
+		panic("unreachable")
 	}
 }
