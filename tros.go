@@ -6,39 +6,57 @@ import (
 	"sort"
 )
 
-// Sort sorts a slice of structs based on the values of the structs' fields with
-// the given field name fn
+// SortInterface returns a sort.Interface suitable for sorting, reversing,
+// searching, etc., a slice of structs by with the given field name fn
 //
 // i must be a slice of homogeneous structs. That is, all structs must have an
-// exported field with the name fn, and those fields must all be of the same type.
+// exported field with the name fn, and those fields must all be of the same
+// type.
 //
-// Sort is significantly (~10x) slower than the standard Go sort package,
-// because it relies heavily on reflection.
-func Sort(i interface{}, fn string) error {
+// Operations using this sort.Interface are significantly (~10x) slower than the
+// standard Go sorting idiom, because it relies heavily on reflection.
+func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 	sval := reflect.ValueOf(i)
 	if sval.Kind() != reflect.Slice {
-		return fmt.Errorf("non-slice interface, got %q", sval.Kind())
+		return nil, fmt.Errorf("non-slice interface, got %q", sval.Kind())
 	}
 	l := sval.Len()
 	vals := make([]reflect.Value, l)
 	fs := make([]reflect.Value, l)
 	k := sval.Index(0).FieldByName(fn).Kind()
 	if k == reflect.Invalid {
-		return fmt.Errorf("no field with name %q", fn)
+		return nil, fmt.Errorf("no field with name %q", fn)
 	}
 	if k > reflect.Float64 && k != reflect.String {
-		return fmt.Errorf("unsupported kind %q", k)
+		return nil, fmt.Errorf("unsupported kind %q", k)
 	}
 	for i := 0; i < l; i++ {
 		v := sval.Index(i)
 		f := v.FieldByName(fn)
 		if f.Kind() != k {
-			return fmt.Errorf("unmatched field kinds, %q vs %q", f.Kind(), k)
+			return nil, fmt.Errorf("unmatched field kinds, %q vs %q", f.Kind(), k)
 		}
 		vals[i] = v
 		fs[i] = f
 	}
-	sort.Sort(sort.Interface(sortable{vals, fs, k}))
+	return sort.Interface(sortable{vals, fs, k}), nil
+}
+
+// Sort sorts a slice of structs based on the values of the structs' fields with
+// the given field name fn
+//
+// i must be a slice of homogeneous structs. That is, all structs must have an
+// exported field with the name fn, and those fields must all be of the same
+// type.
+//
+// Sort is significantly (~10x) slower than the standard Go sort.Sort function,
+// because it relies heavily on reflection.
+func Sort(i interface{}, fn string) error {
+	s, err := SortInterface(i, fn)
+	if err != nil {
+		return err
+	}
+	sort.Sort(s)
 	return nil
 }
 
