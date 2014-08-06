@@ -1,4 +1,3 @@
-tros
-====
+https://godoc.org/github.com/ImJasonH/tros
 
-Tros lets you Sort Go structs using reflection. Get it?
+[Tests](https://github.com/ImJasonH/tros/blob/master/tros_test.go) | [Benchmarks](https://github.com/ImJasonH/tros/blob/master/benchmark_test.go)
