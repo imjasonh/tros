@@ -4,14 +4,14 @@ package tros
 * Sample run:
 *
 * PASS
-* BenchmarkTros10           500000              4298 ns/op
-* BenchmarkTros100           50000             65702 ns/op
-* BenchmarkTros1000           5000            750208 ns/op
-* BenchmarkTros10000           500           7033497 ns/op
-* BenchmarkSort10          5000000               481 ns/op
-* BenchmarkSort100          200000             12586 ns/op
-* BenchmarkSort1000          10000            139314 ns/op
-* BenchmarkSort10000          2000           1164613 ns/op
+* BenchmarkTros10           500000              3450 ns/op
+* BenchmarkTros100           50000             45473 ns/op
+* BenchmarkTros1000           5000            530274 ns/op
+* BenchmarkTros10000           500           4920590 ns/op
+* BenchmarkSort10          5000000               422 ns/op
+* BenchmarkSort100          200000             10586 ns/op
+* BenchmarkSort1000          10000            119307 ns/op
+* BenchmarkSort10000          2000           1101954 ns/op
  */
 
 import (
