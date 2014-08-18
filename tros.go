@@ -39,7 +39,8 @@ func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 		vals[i] = v
 		fs[i] = f
 	}
-	return sort.Interface(sortable{vals, fs, k}), nil
+	tmp := reflect.New(vals[0].Type()).Elem()
+	return sort.Interface(&sortable{vals, fs, k, tmp}), nil
 }
 
 // Sort sorts a slice of structs based on the values of the structs' fields with
@@ -64,19 +65,19 @@ type sortable struct {
 	vals []reflect.Value
 	fs   []reflect.Value
 	k    reflect.Kind
+	tmp  reflect.Value // reused for swapping
 }
 
-func (s sortable) Len() int { return len(s.vals) }
+func (s *sortable) Len() int { return len(s.vals) }
 
-func (s sortable) Swap(i, j int) {
+func (s *sortable) Swap(i, j int) {
 	a, b := s.vals[i], s.vals[j]
-	tmp := reflect.New(a.Type()).Elem()
-	tmp.Set(a)
+	s.tmp.Set(a)
 	a.Set(b)
-	b.Set(tmp)
+	b.Set(s.tmp)
 }
 
-func (s sortable) Less(i, j int) bool {
+func (s *sortable) Less(i, j int) bool {
 	af, bf := s.fs[i], s.fs[j]
 	switch s.k {
 	case reflect.Bool:
