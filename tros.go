@@ -1,3 +1,4 @@
+// Package tros provides methods to sort slices of structs using reflection
 package tros
 
 import (
@@ -13,7 +14,7 @@ import (
 // exported field with the name fn, and those fields must all be of the same
 // type.
 //
-// Operations using this sort.Interface are significantly (~10x) slower than the
+// Operations using this sort.Interface are significantly (~4-8x) slower than the
 // standard Go sorting idiom, because it relies heavily on reflection.
 func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 	sval := reflect.ValueOf(i)
