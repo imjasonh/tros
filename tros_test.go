@@ -13,29 +13,37 @@ func TestSort(t *testing.T) {
 		ss  []s
 		fn  string
 		exp []s
-		err error
 	}{{
 		[]s{{"a", "c"}, {"b", "b"}, {"c", "a"}},
 		"B",
 		[]s{{"c", "a"}, {"b", "b"}, {"a", "c"}},
-		nil,
 	}, {
 		[]s{{"c", "a"}, {"b", "b"}, {"a", "c"}},
 		"A",
 		[]s{{"a", "c"}, {"b", "b"}, {"c", "a"}},
-		nil,
 	}, {
 		[]s{{"a", "c"}, {"b", "b"}, {"c", "a"}},
 		"A",
 		[]s{{"a", "c"}, {"b", "b"}, {"c", "a"}},
-		nil,
 	}} {
-		if err := Sort(c.ss, c.fn); err != c.err {
+		if err := Sort(c.ss, c.fn); err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
-		if c.err != nil && !reflect.DeepEqual(c.ss, c.exp) {
+		if !reflect.DeepEqual(c.ss, c.exp) {
 			t.Errorf("unexpected result\n got %v\nwant %v", c.ss, c.exp)
 		}
 	}
+}
 
+func TestSort_Bool(t *testing.T) {
+	type e struct {
+		A bool
+	}
+	l := []e{e{true}, e{true}, e{false}, e{true}, e{false}}
+	if err := Sort(l, "A"); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if got, want := l, []e{e{false}, e{false}, e{true}, e{true}, e{true}}; !reflect.DeepEqual(got, want) {
+		t.Errorf("unexpected result, got %v want %v", got, want)
+	}
 }
