@@ -1,4 +1,4 @@
-`tros` provides methods to sort slices of structs based on the values of fields specified at runtime.
+`tros` provides methods to sort slices of structs based on the values of fields specified at runtime, using reflection.
 
 [![GoDoc](https://godoc.org/github.com/ImJasonH/tros?status.svg)](https://godoc.org/github.com/ImJasonH/tros)
 
