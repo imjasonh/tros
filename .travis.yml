@@ -1,0 +1,11 @@
+language: go
+
+go:
+ - 1.3
+ - tip
+
+notifications:
+  recipients:
+    - imjasonh+travis@gmail.com
+  on_success: never
+  on_failure: change
