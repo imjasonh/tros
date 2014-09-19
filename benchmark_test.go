@@ -90,3 +90,13 @@ type cSlice []container
 func (s cSlice) Len() int           { return len(s) }
 func (s cSlice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s cSlice) Less(i, j int) bool { return len(s[i].A.val) < len(s[j].A.val) }
+
+func BenchmarkSliceStruct(b *testing.B) {
+	rand.Seed(1)
+	for i := 0; i < b.N; i++ {
+		s := randStructSlice()
+		slice.Sort(s, func(i, j int) bool {
+			return len(s[i].A.val) < len(s[j].A.val)
+		})
+	}
+}
