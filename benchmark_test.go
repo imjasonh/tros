@@ -3,14 +3,17 @@ package tros
 /*
 * Sample run:
 * PASS
-* BenchmarkTros        200           7784816 ns/op
-* BenchmarkSort        500           3147062 ns/op
+* BenchmarkTros        200           6813560 ns/op
+* BenchmarkSort       1000           3184105 ns/op
+* BenchmarkSlice       500           3687327 ns/op
  */
 
 import (
 	"math/rand"
 	"sort"
 	"testing"
+
+	"github.com/bradfitz/slice"
 )
 
 const (
@@ -26,9 +29,9 @@ func randLetter() string {
 	return string(alphabet[rand.Intn(len(alphabet))])
 }
 
-func slice(n int) []el {
-	s := make([]el, n)
-	for i := 0; i < n; i++ {
+func randSlice() []el {
+	s := make([]el, sliceLen)
+	for i := 0; i < sliceLen; i++ {
 		s[i] = el{randLetter()}
 	}
 	return s
@@ -37,7 +40,7 @@ func slice(n int) []el {
 func BenchmarkTros(b *testing.B) {
 	rand.Seed(1)
 	for i := 0; i < b.N; i++ {
-		s := slice(sliceLen)
+		s := randSlice()
 		Sort(s, "A")
 	}
 }
@@ -45,7 +48,7 @@ func BenchmarkTros(b *testing.B) {
 func BenchmarkSort(b *testing.B) {
 	rand.Seed(1)
 	for i := 0; i < b.N; i++ {
-		s := sort.Interface(iface(slice(sliceLen)))
+		s := sort.Interface(iface(randSlice()))
 		sort.Sort(s)
 	}
 }
@@ -55,3 +58,13 @@ type iface []el
 func (s iface) Len() int           { return len(s) }
 func (s iface) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s iface) Less(i, j int) bool { return s[i].A < s[j].A }
+
+func BenchmarkSlice(b *testing.B) {
+	rand.Seed(1)
+	for i := 0; i < b.N; i++ {
+		s := randSlice()
+		slice.Sort(s, func(i, j int) bool {
+			return s[i].A < s[j].A
+		})
+	}
+}
