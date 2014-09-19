@@ -53,18 +53,18 @@ func TestSort_Struct(t *testing.T) {
 		s, exp []container
 	}{{
 		[]container{
-			container{lenLesser{"aaa"}},
-			container{lenLesser{"a"}},
-			container{lenLesser{"aaaaa"}},
-			container{lenLesser{"aa"}},
-			container{lenLesser{"a"}},
+			container{lenLesser{"xxx"}},
+			container{lenLesser{"z"}},
+			container{lenLesser{"wwwww"}},
+			container{lenLesser{"yy"}},
+			container{lenLesser{"z"}},
 		},
 		[]container{
-			container{lenLesser{"a"}},
-			container{lenLesser{"a"}},
-			container{lenLesser{"aa"}},
-			container{lenLesser{"aaa"}},
-			container{lenLesser{"aaaaa"}},
+			container{lenLesser{"z"}},
+			container{lenLesser{"z"}},
+			container{lenLesser{"yy"}},
+			container{lenLesser{"xxx"}},
+			container{lenLesser{"wwwww"}},
 		},
 	}} {
 		if err := Sort(c.s, "A"); err != nil {
