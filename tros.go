@@ -24,11 +24,12 @@ func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 	l := sval.Len()
 	vals := make([]reflect.Value, l)
 	fs := make([]reflect.Value, l)
+	var ls []Lesser
 	k := sval.Index(0).FieldByName(fn).Kind()
 	if k == reflect.Invalid {
 		return nil, fmt.Errorf("no field with name %q", fn)
 	}
-	if k > reflect.Float64 && k != reflect.String {
+	if k > reflect.Float64 && k != reflect.String && k != reflect.Struct {
 		return nil, fmt.Errorf("unsupported kind %q", k)
 	}
 	for i := 0; i < l; i++ {
@@ -37,11 +38,21 @@ func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 		if f.Kind() != k {
 			return nil, fmt.Errorf("unmatched field kinds, %q vs %q", f.Kind(), k)
 		}
+		if f.Kind() == reflect.Struct {
+			if ls == nil {
+				ls = make([]Lesser, l)
+			}
+			less, ok := f.Interface().(Lesser)
+			if !ok {
+				return nil, fmt.Errorf("struct field does not implement Lesser")
+			}
+			ls[i] = less
+		}
 		vals[i] = v
 		fs[i] = f
 	}
 	tmp := reflect.New(vals[0].Type()).Elem()
-	return sort.Interface(&sortable{vals, fs, k, tmp}), nil
+	return sort.Interface(&sortable{vals, fs, k, tmp, ls}), nil
 }
 
 // Sort sorts a slice of structs based on the values of the structs' fields with
@@ -67,6 +78,7 @@ type sortable struct {
 	fs   []reflect.Value
 	k    reflect.Kind
 	tmp  reflect.Value // reused for swapping
+	ls   []Lesser      // used for comparing structs with Lesser fields
 }
 
 func (s *sortable) Len() int { return len(s.vals) }
@@ -76,6 +88,10 @@ func (s *sortable) Swap(i, j int) {
 	s.tmp.Set(a)
 	a.Set(b)
 	b.Set(s.tmp)
+
+	if s.ls != nil {
+		s.ls[i], s.ls[j] = s.ls[j], s.ls[i]
+	}
 }
 
 func (s *sortable) Less(i, j int) bool {
@@ -91,8 +107,15 @@ func (s *sortable) Less(i, j int) bool {
 		return af.Float() < bf.Float()
 	case reflect.String:
 		return af.String() < bf.String()
+	case reflect.Struct:
+		return s.ls[i].Less(s.ls[j])
 	default:
-		// Check in Sort should prevent this
-		panic("unreachable")
+		panic("unreachable: invalid Kind") // Check in Sort should prevent this
 	}
+}
+
+// Fields implementing this interface may be used to sort structs using the
+// field's implementation of Less.
+type Lesser interface {
+	Less(other Lesser) bool
 }

@@ -10,6 +10,7 @@ package tros
 import (
 	"math/rand"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -22,14 +23,10 @@ type el struct {
 	A string
 }
 
-func randLetter() string {
-	return string(alphabet[rand.Intn(len(alphabet))])
-}
-
-func slice(n int) []el {
-	s := make([]el, n)
-	for i := 0; i < n; i++ {
-		s[i] = el{randLetter()}
+func randSlice() []el {
+	s := make([]el, sliceLen)
+	for i := 0; i < len(s); i++ {
+		s[i] = el{string(alphabet[rand.Intn(len(alphabet))])}
 	}
 	return s
 }
@@ -37,16 +34,14 @@ func slice(n int) []el {
 func BenchmarkTros(b *testing.B) {
 	rand.Seed(1)
 	for i := 0; i < b.N; i++ {
-		s := slice(sliceLen)
-		Sort(s, "A")
+		Sort(randSlice(), "A")
 	}
 }
 
 func BenchmarkSort(b *testing.B) {
 	rand.Seed(1)
 	for i := 0; i < b.N; i++ {
-		s := sort.Interface(iface(slice(sliceLen)))
-		sort.Sort(s)
+		sort.Sort(sort.Interface(iface(randSlice())))
 	}
 }
 
@@ -55,3 +50,30 @@ type iface []el
 func (s iface) Len() int           { return len(s) }
 func (s iface) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s iface) Less(i, j int) bool { return s[i].A < s[j].A }
+
+func randStructSlice() []container {
+	s := make([]container, sliceLen)
+	for i := 0; i < len(s); i++ {
+		s[i] = container{lenLesser{strings.Repeat("a", rand.Intn(10))}}
+	}
+	return s
+}
+func BenchmarkTrosStruct(b *testing.B) {
+	rand.Seed(1)
+	for i := 0; i < b.N; i++ {
+		Sort(randStructSlice(), "A")
+	}
+}
+
+func BenchmarkSortStruct(b *testing.B) {
+	rand.Seed(1)
+	for i := 0; i < b.N; i++ {
+		sort.Sort(sort.Interface(cSlice(randStructSlice())))
+	}
+}
+
+type cSlice []container
+
+func (s cSlice) Len() int           { return len(s) }
+func (s cSlice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s cSlice) Less(i, j int) bool { return len(s[i].A.val) < len(s[j].A.val) }

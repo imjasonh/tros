@@ -47,3 +47,49 @@ func TestSort_Bool(t *testing.T) {
 		t.Errorf("unexpected result, got %v want %v", got, want)
 	}
 }
+
+func TestSort_Struct(t *testing.T) {
+	for _, c := range []struct {
+		s, exp []container
+	}{{
+		[]container{
+			container{lenLesser{"aaa"}},
+			container{lenLesser{"a"}},
+			container{lenLesser{"aaaaa"}},
+			container{lenLesser{"aa"}},
+			container{lenLesser{"a"}},
+		},
+		[]container{
+			container{lenLesser{"a"}},
+			container{lenLesser{"a"}},
+			container{lenLesser{"aa"}},
+			container{lenLesser{"aaa"}},
+			container{lenLesser{"aaaaa"}},
+		},
+	}} {
+		if err := Sort(c.s, "A"); err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if !reflect.DeepEqual(c.s, c.exp) {
+			t.Errorf("unexpected result\n got %v\nwant %v", c.s, c.exp)
+		}
+	}
+}
+
+type container struct {
+	A lenLesser
+}
+
+// Implements Less by comparing lengths, resulting in strings sorted by length
+// but nothing else meaningful.
+type lenLesser struct {
+	val string
+}
+
+func (l lenLesser) Less(o Lesser) bool {
+	ol, ok := o.(lenLesser)
+	if !ok {
+		panic("other is not lenLesser")
+	}
+	return len(l.val) < len(ol.val)
+}
