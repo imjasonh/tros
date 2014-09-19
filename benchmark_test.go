@@ -11,6 +11,7 @@ package tros
 import (
 	"math/rand"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/bradfitz/slice"
@@ -25,14 +26,10 @@ type el struct {
 	A string
 }
 
-func randLetter() string {
-	return string(alphabet[rand.Intn(len(alphabet))])
-}
-
 func randSlice() []el {
 	s := make([]el, sliceLen)
-	for i := 0; i < sliceLen; i++ {
-		s[i] = el{randLetter()}
+	for i := 0; i < len(s); i++ {
+		s[i] = el{string(alphabet[rand.Intn(len(alphabet))])}
 	}
 	return s
 }
@@ -40,16 +37,14 @@ func randSlice() []el {
 func BenchmarkTros(b *testing.B) {
 	rand.Seed(1)
 	for i := 0; i < b.N; i++ {
-		s := randSlice()
-		Sort(s, "A")
+		Sort(randSlice(), "A")
 	}
 }
 
 func BenchmarkSort(b *testing.B) {
 	rand.Seed(1)
 	for i := 0; i < b.N; i++ {
-		s := sort.Interface(iface(randSlice()))
-		sort.Sort(s)
+		sort.Sort(sort.Interface(iface(randSlice())))
 	}
 }
 
@@ -68,3 +63,30 @@ func BenchmarkSlice(b *testing.B) {
 		})
 	}
 }
+
+func randStructSlice() []container {
+	s := make([]container, sliceLen)
+	for i := 0; i < len(s); i++ {
+		s[i] = container{lenLesser{strings.Repeat("a", rand.Intn(10))}}
+	}
+	return s
+}
+func BenchmarkTrosStruct(b *testing.B) {
+	rand.Seed(1)
+	for i := 0; i < b.N; i++ {
+		Sort(randStructSlice(), "A")
+	}
+}
+
+func BenchmarkSortStruct(b *testing.B) {
+	rand.Seed(1)
+	for i := 0; i < b.N; i++ {
+		sort.Sort(sort.Interface(cSlice(randStructSlice())))
+	}
+}
+
+type cSlice []container
+
+func (s cSlice) Len() int           { return len(s) }
+func (s cSlice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s cSlice) Less(i, j int) bool { return len(s[i].A.val) < len(s[j].A.val) }
