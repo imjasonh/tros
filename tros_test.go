@@ -48,23 +48,42 @@ func TestSort_Bool(t *testing.T) {
 	}
 }
 
-func TestSort_Struct(t *testing.T) {
+// Demonstrates sorting slices of structs on fields that implements Lesser.
+func TestSort_Lesser(t *testing.T) {
 	for _, c := range []struct {
-		s, exp []container
+		s, exp interface{}
 	}{{
 		[]container{
-			container{lenLesser{"xxx"}},
-			container{lenLesser{"z"}},
-			container{lenLesser{"wwwww"}},
-			container{lenLesser{"yy"}},
-			container{lenLesser{"z"}},
+			{lenLesserStruct{"xxx"}},
+			{lenLesserStruct{"z"}},
+			{lenLesserStruct{"wwwww"}},
+			{lenLesserStruct{"yy"}},
+			{lenLesserStruct{"z"}},
 		},
 		[]container{
-			container{lenLesser{"z"}},
-			container{lenLesser{"z"}},
-			container{lenLesser{"yy"}},
-			container{lenLesser{"xxx"}},
-			container{lenLesser{"wwwww"}},
+			{lenLesserStruct{"z"}},
+			{lenLesserStruct{"z"}},
+			{lenLesserStruct{"yy"}},
+			{lenLesserStruct{"xxx"}},
+			{lenLesserStruct{"wwwww"}},
+		},
+	}, {
+		// This case is different than the above case because if
+		// lenLesserString didn't implement Less then the result would
+		// be a slice sorted using string-sorting instead of by length.
+		[]container2{
+			{lenLesserString("xxx")},
+			{lenLesserString("z")},
+			{lenLesserString("wwwww")},
+			{lenLesserString("yy")},
+			{lenLesserString("z")},
+		},
+		[]container2{
+			{lenLesserString("z")},
+			{lenLesserString("z")},
+			{lenLesserString("yy")},
+			{lenLesserString("xxx")},
+			{lenLesserString("wwwww")},
 		},
 	}} {
 		if err := Sort(c.s, "A"); err != nil {
@@ -77,19 +96,31 @@ func TestSort_Struct(t *testing.T) {
 }
 
 type container struct {
-	A lenLesser
+	A lenLesserStruct
 }
 
-// Implements Less by comparing lengths, resulting in strings sorted by length
-// but nothing else meaningful.
-type lenLesser struct {
+type lenLesserStruct struct {
 	val string
 }
 
-func (l lenLesser) Less(o Lesser) bool {
-	ol, ok := o.(lenLesser)
+func (l lenLesserStruct) Less(o Lesser) bool {
+	ol, ok := o.(lenLesserStruct)
 	if !ok {
-		panic("other is not lenLesser")
+		panic("other is not lenLesserStruct")
 	}
 	return len(l.val) < len(ol.val)
+}
+
+type container2 struct {
+	A lenLesserString
+}
+
+type lenLesserString string
+
+func (l lenLesserString) Less(o Lesser) bool {
+	ol, ok := o.(lenLesserString)
+	if !ok {
+		panic("other is not lenLesserString")
+	}
+	return len(l) < len(ol)
 }

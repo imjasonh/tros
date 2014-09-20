@@ -23,7 +23,7 @@ func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 	}
 	l := sval.Len()
 	vals := make([]reflect.Value, l)
-	fs := make([]reflect.Value, l)
+	var fs []reflect.Value
 	var ls []Lesser
 	k := sval.Index(0).FieldByName(fn).Kind()
 	if k == reflect.Invalid {
@@ -38,18 +38,20 @@ func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 		if f.Kind() != k {
 			return nil, fmt.Errorf("unmatched field kinds, %q vs %q", f.Kind(), k)
 		}
-		if f.Kind() == reflect.Struct {
+		if less, ok := f.Interface().(Lesser); ok {
 			if ls == nil {
 				ls = make([]Lesser, l)
 			}
-			less, ok := f.Interface().(Lesser)
-			if !ok {
-				return nil, fmt.Errorf("struct field does not implement Lesser")
-			}
 			ls[i] = less
+		} else if f.Kind() == reflect.Struct {
+			return nil, fmt.Errorf("struct field %q does not implement Lesser", fn)
+		} else {
+			if fs == nil {
+				fs = make([]reflect.Value, l)
+			}
+			fs[i] = f
 		}
 		vals[i] = v
-		fs[i] = f
 	}
 	tmp := reflect.New(vals[0].Type()).Elem()
 	return sort.Interface(&sortable{vals, fs, k, tmp, ls}), nil
@@ -95,6 +97,10 @@ func (s *sortable) Swap(i, j int) {
 }
 
 func (s *sortable) Less(i, j int) bool {
+	if s.ls != nil {
+		return s.ls[i].Less(s.ls[j])
+	}
+
 	af, bf := s.fs[i], s.fs[j]
 	switch s.k {
 	case reflect.Bool:
@@ -107,8 +113,6 @@ func (s *sortable) Less(i, j int) bool {
 		return af.Float() < bf.Float()
 	case reflect.String:
 		return af.String() < bf.String()
-	case reflect.Struct:
-		return s.ls[i].Less(s.ls[j])
 	default:
 		panic("unreachable: invalid Kind") // Check in Sort should prevent this
 	}

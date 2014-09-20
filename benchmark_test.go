@@ -16,8 +16,10 @@ import (
 
 const (
 	alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	sliceLen = 10000
+	sliceLen = 1000
 )
+
+/// Regular field comparison
 
 type el struct {
 	A string
@@ -26,7 +28,9 @@ type el struct {
 func randSlice() []el {
 	s := make([]el, sliceLen)
 	for i := 0; i < len(s); i++ {
-		s[i] = el{string(alphabet[rand.Intn(len(alphabet))])}
+		s[i] = el{strings.Repeat(
+			string(alphabet[rand.Intn(len(alphabet))]),
+			rand.Intn(10))}
 	}
 	return s
 }
@@ -51,29 +55,38 @@ func (s iface) Len() int           { return len(s) }
 func (s iface) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s iface) Less(i, j int) bool { return s[i].A < s[j].A }
 
-func randStructSlice() []container {
-	s := make([]container, sliceLen)
+/// Lesser field comparison
+
+type el2 struct {
+	A lenLesserString
+}
+
+func randLesserSlice() []el2 {
+	s := make([]el2, sliceLen)
 	for i := 0; i < len(s); i++ {
-		s[i] = container{lenLesser{strings.Repeat("a", rand.Intn(10))}}
+		s[i] = el2{lenLesserString(strings.Repeat(
+			string(alphabet[rand.Intn(len(alphabet))]),
+			rand.Intn(10)))}
 	}
 	return s
 }
-func BenchmarkTrosStruct(b *testing.B) {
+
+func BenchmarkTrosLesser(b *testing.B) {
 	rand.Seed(1)
 	for i := 0; i < b.N; i++ {
-		Sort(randStructSlice(), "A")
+		Sort(randLesserSlice(), "A")
 	}
 }
 
-func BenchmarkSortStruct(b *testing.B) {
+func BenchmarkSortLesser(b *testing.B) {
 	rand.Seed(1)
 	for i := 0; i < b.N; i++ {
-		sort.Sort(sort.Interface(cSlice(randStructSlice())))
+		sort.Sort(sort.Interface(iface2(randLesserSlice())))
 	}
 }
 
-type cSlice []container
+type iface2 []el2
 
-func (s cSlice) Len() int           { return len(s) }
-func (s cSlice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s cSlice) Less(i, j int) bool { return len(s[i].A.val) < len(s[j].A.val) }
+func (s iface2) Len() int           { return len(s) }
+func (s iface2) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s iface2) Less(i, j int) bool { return s[i].A.Less(s[j].A) }
