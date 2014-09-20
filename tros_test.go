@@ -1,6 +1,7 @@
 package tros
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -31,6 +32,39 @@ func TestSort(t *testing.T) {
 		}
 		if !reflect.DeepEqual(c.ss, c.exp) {
 			t.Errorf("unexpected result\n got %v\nwant %v", c.ss, c.exp)
+		}
+	}
+}
+
+func TestSort_Invalid(t *testing.T) {
+	// TODO: Figure out how to get unmatched field kinds to happen or remove the error check.
+	for _, c := range []struct {
+		in  interface{}
+		fn  string
+		err string
+	}{{
+		true, "",
+		fmt.Sprintf("non-slice interface, got %q", reflect.Bool),
+	}, {
+		[]struct{ A string }{}, "A",
+		"slice is empty",
+	}, {
+		[]struct{ B string }{{"a"}}, "A",
+		fmt.Sprintf("no field with name %q", "A"),
+	}, {
+		[]struct{ a string }{{"a"}}, "a",
+		fmt.Sprintf("field %q is not exported", "a"),
+	}, {
+		[]struct{ A []bool }{{[]bool{true}}}, "A",
+		fmt.Sprintf("unsupported kind %q", reflect.Slice),
+	}, {
+		[]struct{ A struct{} }{{struct{}{}}}, "A",
+		fmt.Sprintf("struct field %q does not implement Lesser", "A"),
+	}} {
+		if _, got := SortInterface(c.in, c.fn); got != nil && got.Error() != c.err {
+			t.Errorf("unexpected error:\n got %v\nwant %v", got, c.err)
+		} else if got == nil {
+			t.Errorf("expected error, got none")
 		}
 	}
 }

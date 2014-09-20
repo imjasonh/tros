@@ -22,12 +22,19 @@ func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 		return nil, fmt.Errorf("non-slice interface, got %q", sval.Kind())
 	}
 	l := sval.Len()
+	if l == 0 {
+		return nil, fmt.Errorf("slice is empty")
+	}
 	vals := make([]reflect.Value, l)
 	var fs []reflect.Value
 	var ls []Lesser
-	k := sval.Index(0).FieldByName(fn).Kind()
+	f0 := sval.Index(0).FieldByName(fn)
+	k := f0.Kind()
 	if k == reflect.Invalid {
 		return nil, fmt.Errorf("no field with name %q", fn)
+	}
+	if !f0.CanSet() {
+		return nil, fmt.Errorf("field %q is not exported", fn)
 	}
 	if k > reflect.Float64 && k != reflect.String && k != reflect.Struct {
 		return nil, fmt.Errorf("unsupported kind %q", k)
@@ -54,7 +61,7 @@ func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 		vals[i] = v
 	}
 	tmp := reflect.New(vals[0].Type()).Elem()
-	return sort.Interface(&sortable{vals, fs, k, tmp, ls}), nil
+	return sort.Interface(&sortable{vals, k, tmp, fs, ls}), nil
 }
 
 // Sort sorts a slice of structs based on the values of the structs' fields with
@@ -77,10 +84,10 @@ func Sort(i interface{}, fn string) error {
 
 type sortable struct {
 	vals []reflect.Value
-	fs   []reflect.Value
 	k    reflect.Kind
-	tmp  reflect.Value // reused for swapping
-	ls   []Lesser      // used for comparing structs with Lesser fields
+	tmp  reflect.Value   // reused for swapping
+	fs   []reflect.Value // used for comparing structs by non-Lesser fields
+	ls   []Lesser        // used for comparing structs by Lesser fields
 }
 
 func (s *sortable) Len() int { return len(s.vals) }
