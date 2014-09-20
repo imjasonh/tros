@@ -125,8 +125,8 @@ func (s *sortable) Less(i, j int) bool {
 	}
 }
 
-// Fields implementing this interface may be used to sort structs using the
-// field's implementation of Less.
+// Fields implementing this interface will use their implementation of Less to
+// determine ordering.
 type Lesser interface {
 	Less(other Lesser) bool
 }
