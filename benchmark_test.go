@@ -1,12 +1,5 @@
 package tros
 
-/*
-* Sample run:
-* PASS
-* BenchmarkTros        200           7784816 ns/op
-* BenchmarkSort        500           3147062 ns/op
- */
-
 import (
 	"math/rand"
 	"sort"
