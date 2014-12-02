@@ -1,4 +1,4 @@
-`tros` provides methods to sort slices of structs based on the values of fields specified at runtime, using reflection.
+`tros` provides methods to sort slices of structs using reflection
 
 [![GoDoc](https://godoc.org/github.com/ImJasonH/tros?status.svg)](https://godoc.org/github.com/ImJasonH/tros)
 [![Build Status](https://travis-ci.org/ImJasonH/tros.svg?branch=master)](https://travis-ci.org/ImJasonH/tros)
@@ -49,11 +49,16 @@ func sortThings(things []Thing) {
     tros.Sort(things, "Weight")
     fmt.Println(things)
     
+    // Sort in reverse order too!
+    fmt.Println("Sorted by name (reversed!)")
+    tros.Sort(things, "-Name")
+    fmt.Println(things)
+    
     // ...and so on
 }
 ```
 
-With `tros`, you can sort slices of structs by the values of arbitrary fields described at runtime, leaving out lots of boring boilerplate.
+With `tros`, you can easily sort slices of structs by the values of arbitrary fields described at runtime, leaving out lots of boring boilerplate.
 
 Custom Sorting
 -----
