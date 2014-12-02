@@ -55,6 +55,10 @@ func sortThings(things []Thing) {
 
 With `tros`, you can sort slices of structs by the values of arbitrary fields described at runtime, leaving out lots of boring boilerplate.
 
+Custom Sorting
+-----
+If you want to define your own custom sorting logic, you can have your struct fields implement the [`Lesser`](https://godoc.org/github.com/ImJasonH/tros#Lesser) interface, which `tros` will use to determine ordering.
+
 Caveats
 -----
 
