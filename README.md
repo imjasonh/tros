@@ -50,7 +50,7 @@ func sortThings(things []Thing) {
     fmt.Println(things)
     
     // Sort in reverse order too!
-    fmt.Println("Sorted by name (reversed!)")
+    fmt.Println("Sorted by name (reversed):")
     tros.Sort(things, "-Name")
     fmt.Println(things)
     
@@ -67,7 +67,7 @@ If you want to define your own custom sorting logic, you can have your struct fi
 Caveats
 -----
 
-* `tros` uses reflection, and as such is noticeably (~2.5x) slower for sorting than the idiomatic Go way. But for small-to-medium slices, the difference should be negligible. If performance is more important than speed, use the standard [`sort`](https://godoc.org/sort) package
+* `tros` uses reflection, and as such is noticeably (~2.5x) slower for sorting than the idiomatic Go way. But for small-to-medium slices, the difference should be negligible. If performance is more important than convenience, use the standard [`sort`](https://godoc.org/sort) package
 
 
 ----------
