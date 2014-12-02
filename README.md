@@ -5,6 +5,61 @@
 
 [Tests](https://github.com/ImJasonH/tros/blob/master/tros_test.go) | [Benchmarks](https://github.com/ImJasonH/tros/blob/master/benchmark_test.go)
 
+Sorting Idiomatically in Go
+-----
+
+```
+type Thing struct {
+	Name           string
+	Weight, Height int
+	Awesome        bool
+}
+
+func sortThingsByName(things []Thing) {
+	sort.Sort(thingWrapper)
+}
+
+type thingWrapper []Thing
+
+func (w thingWrapper) Len() int           { return len(w) }
+func (w thingWrapper) Swap(i, j int)      { w[i], w[j] = w[j], w[i] }
+func (w thingWrapper) Less(i, j int) bool { return w[i].Name < w[j].Name }
+
+// TODO: Support sorting by weight, height, awesomeness, etc.
+```
+
+Sorting slices of Go structs idiomatically is easy, if you only intend to do it for a few different fields, and you know what they are ahead of time. Sorting by arbitrary fields means copypasting lots of boilerplate with small nuanced changes.
+
+Sorting with `tros`
+-----
+
+```
+type Thing struct {
+	Name           string
+	Weight, Height int
+	Awesome        bool
+}
+
+func sortThings(things []Thing) {
+    fmt.Println("Sorted by name:")
+    tros.Sort(things, "Name")
+    fmt.Println(things)
+    
+    fmt.Println("Sorted by weight:")
+    tros.Sort(things, "Weight")
+    fmt.Println(things)
+    
+    // ...and so on
+}
+```
+
+With `tros`, you can sort slices of structs by the values of arbitrary fields described at runtime, leaving out lots of boring boilerplate.
+
+Caveats
+-----
+
+* `tros` uses reflection, and as such is noticeably (~2.5x) slower for sorting than the idiomatic Go way. But for small-to-medium slices, the difference should be negligible. If performance is more important than speed, use the standard [`sort`](https://godoc.org/sort) package
+
 
 ----------
 
