@@ -14,14 +14,14 @@ type Thing struct {
 }
 
 func sortThingsByName(things []Thing) {
-	sort.Sort(thingWrapper)
+	sort.Sort(byName(things))
 }
 
-type thingWrapper []Thing
+type byName []Thing
 
-func (w thingWrapper) Len() int           { return len(w) }
-func (w thingWrapper) Swap(i, j int)      { w[i], w[j] = w[j], w[i] }
-func (w thingWrapper) Less(i, j int) bool { return w[i].Name < w[j].Name }
+func (s byName) Len() int           { return len(s) }
+func (s byName) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s byName) Less(i, j int) bool { return s[i].Name < s[j].Name } // Sort by name
 
 // TODO: Support sorting by weight, height, awesomeness, etc.
 ```
