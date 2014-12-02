@@ -3,8 +3,6 @@
 [![GoDoc](https://godoc.org/github.com/ImJasonH/tros?status.svg)](https://godoc.org/github.com/ImJasonH/tros)
 [![Build Status](https://travis-ci.org/ImJasonH/tros.svg?branch=master)](https://travis-ci.org/ImJasonH/tros)
 
-[Tests](https://github.com/ImJasonH/tros/blob/master/tros_test.go) | [Benchmarks](https://github.com/ImJasonH/tros/blob/master/benchmark_test.go)
-
 Sorting Idiomatically in Go
 -----
 
