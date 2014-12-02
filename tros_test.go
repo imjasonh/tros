@@ -15,17 +15,27 @@ func TestSort(t *testing.T) {
 		fn  string
 		exp []s
 	}{{
-		[]s{{"a", "c"}, {"b", "b"}, {"c", "a"}},
+		[]s{{"c", ""}, {"b", ""}, {"a", ""}},
+		"A",
+		[]s{{"a", ""}, {"b", ""}, {"c", ""}},
+	}, {
+		[]s{{"", "c"}, {"", "b"}, {"", "a"}},
 		"B",
-		[]s{{"c", "a"}, {"b", "b"}, {"a", "c"}},
+		[]s{{"", "a"}, {"", "b"}, {"", "c"}},
 	}, {
-		[]s{{"c", "a"}, {"b", "b"}, {"a", "c"}},
+		// Already in order
+		[]s{{"a", ""}, {"b", ""}, {"c", ""}},
 		"A",
-		[]s{{"a", "c"}, {"b", "b"}, {"c", "a"}},
+		[]s{{"a", ""}, {"b", ""}, {"c", ""}},
 	}, {
-		[]s{{"a", "c"}, {"b", "b"}, {"c", "a"}},
-		"A",
-		[]s{{"a", "c"}, {"b", "b"}, {"c", "a"}},
+		// Reverse ordering
+		[]s{{"a", ""}, {"b", ""}, {"c", ""}},
+		"-A",
+		[]s{{"c", ""}, {"b", ""}, {"a", ""}},
+	}, {
+		[]s{{"", "a"}, {"", "b"}, {"", "c"}},
+		"-B",
+		[]s{{"", "c"}, {"", "b"}, {"", "a"}},
 	}} {
 		if err := Sort(c.ss, c.fn); err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -60,6 +70,9 @@ func TestSort_Invalid(t *testing.T) {
 	}, {
 		[]struct{ A struct{} }{{struct{}{}}}, "A",
 		fmt.Sprintf("struct field %q does not implement Lesser", "A"),
+	}, {
+		[]struct{ A string }{{"a"}}, "",
+		"must specify field name",
 	}} {
 		if _, got := SortInterface(c.in, c.fn); got != nil && got.Error() != c.err {
 			t.Errorf("unexpected error:\n got %v\nwant %v", got, c.err)
