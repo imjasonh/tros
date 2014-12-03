@@ -57,17 +57,11 @@ func SortInterface(i interface{}, fn string) (sort.Interface, error) {
 			return nil, fmt.Errorf("unmatched field kinds, %q vs %q", f.Kind(), k)
 		}
 		if less, ok := f.Interface().(Lesser); ok {
-			if ls == nil {
-				ls = make([]Lesser, l)
-			}
-			ls[i] = less
+			ls = append(ls, less)
 		} else if f.Kind() == reflect.Struct {
 			return nil, fmt.Errorf("struct field %q does not implement Lesser", fn)
 		} else {
-			if fs == nil {
-				fs = make([]reflect.Value, l)
-			}
-			fs[i] = f
+			fs = append(fs, f)
 		}
 		vals[i] = v
 	}
