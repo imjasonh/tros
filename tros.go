@@ -136,6 +136,8 @@ func (s *sortable) Less(i, j int) bool {
 	return r
 }
 
+// Lesser is an interface used to define custom comparison logic.
+
 // Fields implementing this interface may be used to sort structs using the
 // field's implementation of Less.
 type Lesser interface {

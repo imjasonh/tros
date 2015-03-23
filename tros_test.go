@@ -86,11 +86,11 @@ func TestSort_Bool(t *testing.T) {
 	type e struct {
 		A bool
 	}
-	l := []e{e{true}, e{true}, e{false}, e{true}, e{false}}
+	l := []e{{true}, {true}, {false}, {true}, {false}}
 	if err := Sort(l, "A"); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
-	if got, want := l, []e{e{false}, e{false}, e{true}, e{true}, e{true}}; !reflect.DeepEqual(got, want) {
+	if got, want := l, []e{{false}, {false}, {true}, {true}, {true}}; !reflect.DeepEqual(got, want) {
 		t.Errorf("unexpected result, got %v want %v", got, want)
 	}
 }
